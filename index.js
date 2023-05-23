@@ -62,9 +62,31 @@ async function run() {
         if(req.query?.email){
             query = {email : req.query.email}
         }
-        const result = await addedToysCollection.find(query).toArray()
-        res.send(result)
+        // else if(req.query?.search){
+        //   query = {productName : req.query.search}
+        // }
+        
+        let sortObj = {}
+        const value = req.query.value
+        const type = req.query.type
+        sortObj[value] = type
+        console.log(req.query)
+        const result = await addedToysCollection.find(query).sort(sortObj).toArray()
+        res.send(result.slice(0,20))
     })
+
+    app.get('/addToysCollection',async(req,res)=>{
+      const search = req.query.search
+        const keys = ["productName"]
+        const finding = (data) => {
+          return data.filter(item => 
+            keys.some(key =>  item[key].toLowerCase().includes(search))
+            )
+        }
+      const result = await addedToysCollection.find().toArray()
+      res.send(finding(result))
+    })
+
 
     app.delete('/addToys/:id', async(req,res) => {
         const id = req.params.id
